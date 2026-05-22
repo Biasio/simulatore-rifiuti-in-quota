@@ -104,35 +104,10 @@
             align-items: center;
             gap: 0.75rem;
         }
-        .live-badge {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: #6ee7b7;
-            background: rgba(5, 150, 105, 0.2);
-            border: 1px solid rgba(110, 231, 183, 0.35);
-            padding: 0.35rem 0.65rem;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-        .live-badge::before {
-            content: "";
-            width: 6px;
-            height: 6px;
-            background: #34d399;
-            border-radius: 50%;
-            animation: pulse 2s ease infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
         /* WORKSPACE */
         .workspace {
             display: grid;
-            grid-template-columns: minmax(340px, 420px) 1fr;
+            grid-template-columns: minmax(520px, 580px) 1fr;
             flex: 1;
             min-height: 0;
             align-items: stretch;
@@ -222,12 +197,12 @@
         }
         .panel-config input[type="number"] {
             width: 100%;
-            padding: 0.48rem 0.55rem;
+            padding: 0.52rem 0.6rem;
             border: 1px solid var(--border);
             border-radius: 6px;
             background: #fff;
             color: var(--text);
-            font-size: 0.84rem;
+            font-size: 0.9rem;
             font-family: inherit;
             transition: var(--transition);
         }
@@ -247,26 +222,32 @@
             margin-top: 0.35rem;
             border-color: var(--border);
         }
-        .panel-config table { font-size: 0.68rem; }
+        .panel-config table { font-size: 0.76rem; }
         .panel-config th {
             background: #f1f5f9;
             color: var(--text);
-            font-size: 0.62rem;
-            padding: 0.45rem 0.35rem;
+            font-size: 0.68rem;
+            padding: 0.5rem 0.45rem;
+            white-space: nowrap;
         }
         .panel-config td {
-            padding: 0.4rem 0.35rem;
+            padding: 0.45rem 0.4rem;
             color: var(--text);
         }
         .panel-config td input {
-            width: 72px;
-            padding: 0.28rem 0.35rem;
-            font-size: 0.75rem;
+            width: 100%;
+            min-width: 4.5rem;
+            max-width: 6.5rem;
+            padding: 0.38rem 0.45rem;
+            font-size: 0.82rem;
             background: #fff;
             border-color: var(--border);
             color: var(--text);
         }
-        .panel-config td input.large { width: 88px; }
+        .panel-config td input.large {
+            min-width: 5rem;
+            max-width: 7rem;
+        }
         .panel-config td:first-child {
             text-align: left;
             font-weight: 600;
@@ -603,9 +584,107 @@
         }
         #msg_90giorni strong { color: var(--text); }
 
+        /* CONFORMITÀ NORMATIVA */
+        .compliance-panel {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem 1.15rem;
+            box-shadow: var(--shadow);
+        }
+        .compliance-panel h3 {
+            font-size: 0.88rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+        .compliance-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid;
+            margin-bottom: 0.75rem;
+        }
+        .compliance-banner .status-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .compliance-banner .status-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+        .compliance-banner .status-desc {
+            font-size: 0.78rem;
+            line-height: 1.45;
+            opacity: 0.95;
+        }
+        .compliance-banner.ok {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-color: #6ee7b7;
+            color: #065f46;
+        }
+        .compliance-banner.warn {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border-color: #fcd34d;
+            color: #92400e;
+        }
+        .compliance-banner.fail {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        .compliance-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.55rem;
+        }
+        .compliance-metric {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.55rem 0.6rem;
+            text-align: center;
+        }
+        .compliance-metric .m-val {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text);
+            display: block;
+        }
+        .compliance-metric .m-val.over { color: var(--danger); }
+        .compliance-metric .m-lbl {
+            font-size: 0.6rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+            margin-top: 0.2rem;
+            display: block;
+            line-height: 1.25;
+        }
+        .compliance-ref {
+            font-size: 0.68rem;
+            color: var(--text-light);
+            margin-top: 0.65rem;
+            line-height: 1.4;
+        }
+        .save-hint {
+            font-size: 0.68rem;
+            color: var(--accent);
+            margin-top: 0.35rem;
+            font-weight: 600;
+        }
+
         @media (max-width: 1400px) {
             .kpi-band { grid-template-columns: repeat(3, 1fr); }
             .charts-section { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 1280px) {
+            .workspace { grid-template-columns: minmax(460px, 100%) 1fr; }
         }
         @media (max-width: 1100px) {
             .workspace { grid-template-columns: 1fr; }
@@ -620,6 +699,7 @@
             .fields-2col { grid-template-columns: 1fr; }
             .dash-grid { grid-template-columns: 1fr; }
             .kpi-band { grid-template-columns: repeat(2, 1fr); }
+            .compliance-metrics { grid-template-columns: repeat(2, 1fr); }
             .site-header { flex-wrap: wrap; padding: 0.75rem 1rem; }
         }
     </style>
@@ -632,11 +712,10 @@
             <div class="brand-icon" aria-hidden="true">🏔️</div>
             <div class="brand-text">
                 <h1>Simulatore gestione rifiuti</h1>
-                <p>Rifugi alpini · calcolo in tempo reale</p>
+                <p>Rifugi alpini · simulazione e salvataggio automatico</p>
             </div>
         </div>
         <div class="header-actions">
-            <span class="live-badge">Live</span>
             <button class="btn btn-primary" id="btn_reset" type="button">↺ Ripristina default</button>
         </div>
     </header>
@@ -648,6 +727,7 @@
             <div class="panel-config-head">
                 <h2>Configurazione</h2>
                 <p>Modifica i parametri: i risultati si aggiornano subito.</p>
+                <p class="save-hint">💾 Salvataggio automatico nel browser (cookie)</p>
             </div>
             <div class="config-scroll">
 
@@ -750,6 +830,36 @@
                 <div class="kpi"><span class="value" id="kpi_riduzione_volume">—</span><span class="label">Rid. volume (%)</span></div>
             </section>
 
+            <section class="compliance-panel" id="compliance_panel" aria-label="Conformità normativa">
+                <h3>⚖️ Conformità deposito temporaneo (D.Lgs. 152/2006, art. 185-bis)</h3>
+                <div id="compliance_banner" class="compliance-banner ok">
+                    <span class="status-icon" id="compliance_icon">✓</span>
+                    <div>
+                        <div class="status-title" id="compliance_title">In analisi…</div>
+                        <div class="status-desc" id="compliance_desc"></div>
+                    </div>
+                </div>
+                <div class="compliance-metrics">
+                    <div class="compliance-metric">
+                        <span class="m-val" id="comp_vol_giorno">—</span>
+                        <span class="m-lbl">Accumulo medio (m³/giorno)</span>
+                    </div>
+                    <div class="compliance-metric">
+                        <span class="m-val" id="comp_giorno_30">—</span>
+                        <span class="m-lbl">Giorno stim. limite 30 m³</span>
+                    </div>
+                    <div class="compliance-metric">
+                        <span class="m-val" id="comp_vol_stagione">—</span>
+                        <span class="m-lbl">Volume tot. stagione (m³)</span>
+                    </div>
+                    <div class="compliance-metric">
+                        <span class="m-val" id="comp_giorni_periodo">—</span>
+                        <span class="m-lbl">Giorni periodo / max 90</span>
+                    </div>
+                </div>
+                <p class="compliance-ref">Limite di legge per stoccaggio temporaneo in quota: <strong>30 m³</strong> oppure <strong>3 mesi (90 giorni)</strong> di giacenza, prima dello svuotamento (Art. 185-bis D.Lgs. 152/2006). Il simulatore assume accumulo continuo senza evacuazioni intermedie.</p>
+            </section>
+
             <section class="charts-section" aria-label="Grafici">
                 <div class="chart-container">
                     <div class="chart-title">Composizione per peso (post-trattamento)</div>
@@ -840,6 +950,12 @@
 
             let state = JSON.parse(JSON.stringify(DEFAULTS));
 
+            const LIMITE_VOL_M3 = 30;
+            const LIMITE_GIORNI_GIACENZA = 90;
+            const COOKIE_NAME = 'sim_rifugi_v12';
+            const COOKIE_DAYS = 365;
+            let saveCookieTimer = null;
+
             // Riferimenti DOM
             const ids = [
                 'periodo_giorni', 'posti_letto', 'coeff_utilizzo_letti', 'coperti', 'coeff_utilizzo_coperti',
@@ -856,6 +972,14 @@
             const stoccaggioAlerts = document.getElementById('stoccaggio_alerts');
             const msg90giorni = document.getElementById('msg_90giorni');
             const veicoliContainer = document.getElementById('veicoli_container');
+            const complianceBanner = document.getElementById('compliance_banner');
+            const complianceIcon = document.getElementById('compliance_icon');
+            const complianceTitle = document.getElementById('compliance_title');
+            const complianceDesc = document.getElementById('compliance_desc');
+            const compVolGiorno = document.getElementById('comp_vol_giorno');
+            const compGiorno30 = document.getElementById('comp_giorno_30');
+            const compVolStagione = document.getElementById('comp_vol_stagione');
+            const compGiorniPeriodo = document.getElementById('comp_giorni_periodo');
 
             // Charts
             let chartDoughnut, chartBar;
@@ -956,6 +1080,129 @@
                         </div>
                         <p class="veicolo-disattivato" style="display:${v.payload === 0 ? 'block' : 'none'};">Veicolo disattivato</p>`;
                     veicoliContainer.appendChild(div);
+                });
+            }
+
+            function saveStateCookie() {
+                try {
+                    const json = JSON.stringify(state);
+                    localStorage.setItem(COOKIE_NAME, json);
+                    if (json.length > 3800) return;
+                    const exp = new Date();
+                    exp.setDate(exp.getDate() + COOKIE_DAYS);
+                    document.cookie = COOKIE_NAME + '=' + encodeURIComponent(json) +
+                        ';expires=' + exp.toUTCString() + ';path=/;SameSite=Lax';
+                } catch (e) { /* ignore quota / private mode */ }
+            }
+
+            function scheduleSaveCookie() {
+                clearTimeout(saveCookieTimer);
+                saveCookieTimer = setTimeout(saveStateCookie, 400);
+            }
+
+            function loadStateCookie() {
+                try {
+                    const match = document.cookie.match(new RegExp('(?:^|; )' + COOKIE_NAME + '=([^;]*)'));
+                    if (match) return JSON.parse(decodeURIComponent(match[1]));
+                } catch (e) { /* fall through */ }
+                try {
+                    const ls = localStorage.getItem(COOKIE_NAME);
+                    if (ls) return JSON.parse(ls);
+                } catch (e) { /* ignore */ }
+                return null;
+            }
+
+            function clearStateCookie() {
+                document.cookie = COOKIE_NAME + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax';
+                try { localStorage.removeItem(COOKIE_NAME); } catch (e) { /* ignore */ }
+            }
+
+            function mergeLoadedState(loaded) {
+                if (!loaded || typeof loaded !== 'object') return false;
+                const base = JSON.parse(JSON.stringify(DEFAULTS));
+                state = Object.assign(base, loaded);
+                if (Array.isArray(loaded.composizione) && loaded.composizione.length) {
+                    state.composizione = loaded.composizione.map((c, i) =>
+                        Object.assign({}, base.composizione[i] || {}, c));
+                }
+                if (Array.isArray(loaded.veicoli) && loaded.veicoli.length) {
+                    state.veicoli = loaded.veicoli.map((v, i) =>
+                        Object.assign({}, base.veicoli[i] || {}, v));
+                }
+                return true;
+            }
+
+            function applyStateToDOM() {
+                els.periodo_giorni.value = state.periodo_giorni;
+                els.posti_letto.value = state.posti_letto;
+                els.coeff_utilizzo_letti.value = state.coeff_utilizzo_letti;
+                els.coperti.value = state.coperti;
+                els.coeff_utilizzo_coperti.value = state.coeff_utilizzo_coperti;
+                els.escursionisti_giorno.value = state.escursionisti_giorno;
+                els.rifiuti_ospite_giorno.value = state.rifiuti_ospite_giorno;
+                els.rifiuti_escursionista_giorno.value = state.rifiuti_escursionista_giorno;
+                els.grigliato_ospite_giorno.value = state.grigliato_ospite_giorno;
+                chkCompattatore.checked = !!state.presenza_compattatore;
+                buildComposizioneTable();
+                buildVeicoliInputs();
+            }
+
+            function updateComplianceNormativa(V_totale_post, periodoGG, giornoCriticoMin) {
+                const volGiornTot = periodoGG > 0 ? V_totale_post / periodoGG : 0;
+                const giorno30 = volGiornTot > 0 ? Math.ceil(LIMITE_VOL_M3 / volGiornTot) : Infinity;
+                const violVolume = giorno30 <= periodoGG;
+                const violTempo = periodoGG > LIMITE_GIORNI_GIACENZA;
+                const stockFineStagione = volGiornTot * periodoGG;
+
+                compVolGiorno.textContent = volGiornTot.toFixed(4);
+                compGiorno30.textContent = giorno30 === Infinity ? '—' : String(giorno30);
+                compVolStagione.textContent = stockFineStagione.toFixed(2);
+                compGiorniPeriodo.textContent = periodoGG + ' / ' + LIMITE_GIORNI_GIACENZA;
+
+                compGiorno30.classList.toggle('over', violVolume);
+                compVolStagione.classList.toggle('over', stockFineStagione > LIMITE_VOL_M3);
+                compGiorniPeriodo.classList.toggle('over', violTempo);
+
+                const motivi = [];
+                if (violVolume) {
+                    motivi.push('superamento stimato dei 30 m³ al giorno ' + giorno30 +
+                        ' (entro la stagione di ' + periodoGG + ' gg)');
+                }
+                if (violTempo) {
+                    motivi.push('periodo operativo di ' + periodoGG + ' gg oltre il massimo di 3 mesi (90 gg)');
+                }
+                if (giornoCriticoMin < Infinity && giornoCriticoMin <= Math.min(giorno30, LIMITE_GIORNI_GIACENZA)) {
+                    motivi.push('vincolo contenitori raggiunto prima (giorno ' + giornoCriticoMin + ')');
+                }
+
+                complianceBanner.classList.remove('ok', 'warn', 'fail');
+                if (motivi.length === 0) {
+                    complianceBanner.classList.add('ok');
+                    complianceIcon.textContent = '✓';
+                    complianceTitle.textContent = 'Conforme ai limiti di deposito temporaneo';
+                    complianceDesc.textContent = 'Con accumulo continuo, né i 30 m³ né i 90 giorni di giacenza risultano superati nella stagione simulata.';
+                } else if (violVolume || violTempo) {
+                    complianceBanner.classList.add('fail');
+                    complianceIcon.textContent = '✕';
+                    complianceTitle.textContent = 'Non conforme — rischio stoccaggio abusivo';
+                    complianceDesc.textContent = motivi.join('. ') + '.';
+                } else {
+                    complianceBanner.classList.add('warn');
+                    complianceIcon.textContent = '!';
+                    complianceTitle.textContent = 'Attenzione — vincoli operativi';
+                    complianceDesc.textContent = motivi.join('. ') + '.';
+                }
+            }
+
+            function clearCompliance() {
+                complianceBanner.classList.remove('warn', 'fail');
+                complianceBanner.classList.add('ok');
+                complianceIcon.textContent = '—';
+                complianceTitle.textContent = 'Dati non disponibili';
+                complianceDesc.textContent = 'Correggi gli input per valutare la conformità.';
+                [compVolGiorno, compGiorno30, compVolStagione, compGiorniPeriodo].forEach(el => {
+                    el.textContent = '—';
+                    el.classList.remove('over');
                 });
             }
 
@@ -1204,19 +1451,36 @@
                     alertDiv.textContent = `⚠️ Superamento capacità stoccaggio per "${causaCritica}" al giorno ${giornoCriticoMin}. Necessario svuotamento.`;
                     stoccaggioAlerts.appendChild(alertDiv);
                 }
-                if (periodoGG > 90) {
+                if (periodoGG > LIMITE_GIORNI_GIACENZA) {
                     const alert90 = document.createElement('div');
                     alert90.className = 'alert-box alert-danger';
-                    alert90.textContent = `⚠️ Periodo operativo supera 90 giorni (D.Lgs. 152/2006). Primo svuotamento obbligatorio entro il giorno 90.`;
+                    alert90.textContent = `⚠️ Periodo operativo supera 3 mesi (${LIMITE_GIORNI_GIACENZA} gg) — Art. 185-bis D.Lgs. 152/2006. Svuotamento obbligatorio entro il limite temporale di giacenza.`;
                     stoccaggioAlerts.appendChild(alert90);
-                    if (90 < giornoCriticoMin) {
-                        giornoCriticoMin = 90;
-                        causaCritica = 'Limite normativo 90 gg';
+                    if (LIMITE_GIORNI_GIACENZA < giornoCriticoMin) {
+                        giornoCriticoMin = LIMITE_GIORNI_GIACENZA;
+                        causaCritica = 'Limite 3 mesi (art. 185-bis)';
                     }
                 }
+
+                const volGiornTot = periodoGG > 0 ? V_totale_post / periodoGG : 0;
+                const giorno30 = volGiornTot > 0 ? Math.ceil(LIMITE_VOL_M3 / volGiornTot) : Infinity;
+                if (giorno30 <= periodoGG) {
+                    const alert30 = document.createElement('div');
+                    alert30.className = 'alert-box alert-danger';
+                    alert30.textContent = `⚠️ Superamento stimato dei 30 m³ al giorno ${giorno30} (accumulo continuo senza evacuazione, art. 185-bis).`;
+                    stoccaggioAlerts.appendChild(alert30);
+                    if (giorno30 < giornoCriticoMin) {
+                        giornoCriticoMin = giorno30;
+                        causaCritica = 'Limite 30 m³ (art. 185-bis)';
+                    }
+                }
+
                 if (giornoCriticoMin < Infinity) {
                     msg90giorni.innerHTML = `<strong>Giorno critico più vicino:</strong> ${giornoCriticoMin} (${causaCritica})`;
                 }
+
+                updateComplianceNormativa(V_totale_post, periodoGG, giornoCriticoMin);
+                scheduleSaveCookie();
 
                 // Veicoli
                 tbodyVeicOut.innerHTML = '';
@@ -1262,6 +1526,7 @@
                 msg90giorni.innerHTML = '';
                 tbodyVeicOut.innerHTML = '';
                 updateCharts([], [], [], [], []);
+                clearCompliance();
             }
 
             function updateCharts(labels, doughData, volPre, volPost, colors) {
@@ -1276,19 +1541,9 @@
             }
 
             function resetToDefaults() {
+                clearStateCookie();
                 state = JSON.parse(JSON.stringify(DEFAULTS));
-                els.periodo_giorni.value = state.periodo_giorni;
-                els.posti_letto.value = state.posti_letto;
-                els.coeff_utilizzo_letti.value = state.coeff_utilizzo_letti;
-                els.coperti.value = state.coperti;
-                els.coeff_utilizzo_coperti.value = state.coeff_utilizzo_coperti;
-                els.escursionisti_giorno.value = state.escursionisti_giorno;
-                els.rifiuti_ospite_giorno.value = state.rifiuti_ospite_giorno;
-                els.rifiuti_escursionista_giorno.value = state.rifiuti_escursionista_giorno;
-                els.grigliato_ospite_giorno.value = state.grigliato_ospite_giorno;
-                chkCompattatore.checked = state.presenza_compattatore;
-                buildComposizioneTable();
-                buildVeicoliInputs();
+                applyStateToDOM();
                 document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
                 errorPerc.textContent = '';
                 calcola();
@@ -1352,10 +1607,15 @@
             }
 
             function init() {
-                buildComposizioneTable();
-                buildVeicoliInputs();
                 initCharts();
                 attachEvents();
+                const loaded = loadStateCookie();
+                if (mergeLoadedState(loaded)) {
+                    applyStateToDOM();
+                } else {
+                    buildComposizioneTable();
+                    buildVeicoliInputs();
+                }
                 calcola();
             }
 
