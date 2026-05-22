@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulatore Gestione Rifiuti – Rifugi Alpini</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <style>
+        :root {
+            --primary: #8B0000;
+            --primary-dark: #5c0000;
+            --primary-light: #a00000;
+            --bg: #f5f5f0;
+            --bg-card: #ffffff;
+            --bg-sidebar: #1a1a1a;
+            --text: #222;
+            --text-light: #666;
+            --text-sidebar: #ddd;
+            --border: #d0d0c8;
+            --success: #2d6a4f;
+            --warning: #e07b00;
+            --danger: #c1121f;
+            --radius: 8px;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            --transition: 0.2s ease;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 900px;
+            min-width: 900px;
+            background: var(--bg-sidebar);
+            color: var(--text-sidebar);
+            padding: 1.5rem 1.2rem;
+            overflow-y: auto;
+            max-height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #1a1a1a;
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+        .sidebar h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.3px;
+            border-left: 4px solid var(--primary);
+            padding-left: 0.7rem;
+            margin-bottom: 0.2rem;
+        }
+        .sidebar details {
+            background: #222;
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+        }
+        .sidebar details[open] {
+            background: #2a2a2a;
+        }
+        .sidebar summary {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #ccc;
+            cursor: pointer;
+            outline: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .sidebar summary::-webkit-details-marker {
+            display: none;
+        }
+        .sidebar summary::before {
+            content: "▸";
+            display: inline-block;
+            transition: transform 0.2s;
+            font-size: 0.8rem;
+        }
+        .sidebar details[open] summary::before {
+            transform: rotate(90deg);
+        }
+        .sidebar label {
+            font-size: 0.8rem;
+            color: #bbb;
+            display: block;
+            margin-bottom: 0.2rem;
+            font-weight: 500;
+        }
+        .sidebar input[type="number"] {
+            width: 100%;
+            padding: 0.5rem 0.6rem;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: #2a2a2a;
+            color: #eee;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .sidebar input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.25);
+        }
+        .sidebar input.invalid {
+            border-color: var(--danger) !important;
+            background: #3a1a1a !important;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-light);
+            cursor: pointer;
+        }
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            color: #ddd;
+            font-size: 0.85rem;
+        }
+        .btn {
+            padding: 0.55rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            letter-spacing: 0.3px;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #666;
+            color: #ccc;
+        }
+        .btn-outline:hover {
+            background: #333;
+            border-color: #888;
+        }
+        .error-msg {
+            color: #f87171;
+            font-size: 0.75rem;
+            margin-top: 0.2rem;
+            min-height: 1em;
+        }
+        .tooltip-text {
+            font-size: 0.7rem;
+            color: #888;
+            margin-left: 0.3rem;
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            padding: 1.8rem 2rem;
+            overflow-y: auto;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1.6rem;
+        }
+        .main h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            letter-spacing: -0.4px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.4rem;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.2rem 1.4rem;
+        }
+        .card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .kpi-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .kpi {
+            background: #f9f9f6;
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            min-width: 120px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .kpi .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .kpi .label {
+            font-size: 0.72rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        /* TABLES */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            margin-top: 0.5rem;
+        }
+        th, td {
+            padding: 0.5rem 0.6rem;
+            border-bottom: 1px solid #e8e8e0;
+            text-align: center;
+        }
+        th {
+            background: #f0f0e8;
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        td input {
+            width: 110px;                /* sufficiente per mostrare numeri a 4‑5 cifre */
+            padding: 0.3rem 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        td input.large {
+            width: 140px;               /* per campi più ampi come kg e capacità */
+        }
+        td input.invalid {
+            border-color: var(--danger) !important;
+            background: #fff5f5;
+        }
+        /* Rimuove gli spin button su WebKit per evitare sovrapposizioni */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1; /* visibili ma non coprono il testo se c'è abbastanza spazio */
+            height: 24px;
+        }
+        .sum-row {
+            font-weight: 700;
+            background: #fafaf5;
+        }
+        .alert-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 0.6rem 0.8rem;
+            border-radius: 5px;
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: #856404;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .veicolo-disattivato {
+            font-size: 0.7rem;
+            color: #999;
+            font-style: italic;
+            margin-top: 0.25rem;
+        }
+
+        /* CHARTS */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            position: relative;
+            height: 320px;
+        }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                min-width: 100%;
+                max-height: none;
+                position: static;
+            }
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR INPUT con pannelli richiudibili -->
+    <aside class="sidebar">
+        <h2>🏔️ Simulatore costi</h2>
+
+        <details open>
+            <summary>📋 Parametri generali</summary>
+            <div style="margin-top:0.6rem; display:flex; flex-direction:column; gap:0.5rem;">
+                <div>
+                    <label>Periodo in giorni considerato <span class="tooltip-text">Durata stagione operativa</span></label>
+                    <input type="number" id="periodo_giorni" value="60" min="1" step="1">
+                </div>
+                <div>
+                    <label>Posti letto totali</label>
+                    <input type="number" id="posti_letto" value="50" min="0" step="1">
+                </div>
+                <div>
+                    <label>Percentuale occupazione letti per notte (0-1)</label>
+                    <input type="number" id="coeff_utilizzo_letti" value="0.6" min="0" max="1" step="0.05">
+                </div>
+                <div>
+                    <label>Coperti ristorante totali</label>
+                    <input type="number" id="coperti" value="80" min="0" step="1">
+                </div>
+                <div>
+                    <label>Coeff. utilizzo coperti (0-1) <span class="tooltip-text">Per calcolo alternativo escursionisti</span></label>
+                    <input type="number" id="coeff_utilizzo_coperti" value="0.5" min="0" max="1" step="0.05">
+                </div>
+                <div>
+                    <label>Media escursionisti al giorno</label>
+                    <input type="number" id="escursionisti_giorno" value="30" min="0" step="1">
+                </div>
+                <div>
+                    <label>Rifiuti per ospite pernottamento (kg/giorno)</label>
+                    <input type="number" id="rifiuti_ospite_giorno" value="0.20" min="0" step="0.01">
+                </div>
+                <div>
+                    <label>Rifiuti per escursionista (kg/giorno)</label>
+                    <input type="number" id="rifiuti_escursionista_giorno" value="0.10" min="0" step="0.01">
+                </div>
+                <!-- Grigliato sempre attivo, senza checkbox -->
+                <div>
+                    <label>Grigliato per ospite/giorno (kg)</label>
+                    <input type="number" id="grigliato_ospite_giorno" value="0.2" min="0" step="0.01">
+                </div>
+            </div>
+        </details>
+
+        <details open>
+            <summary>🔧 Pre‑trattamento</summary>
+            <div class="checkbox-group" style="margin-top:0.6rem;">
+                <input type="checkbox" id="presenza_compattatore">
+                <label for="presenza_compattatore">Applica pre‑trattamento (riduzioni %)</label>
+            </div>
+            <p style="font-size:0.7rem;color:#999;margin-top:0.2rem;">
+                Attiva le riduzioni di massa/volume della tabella composizione.
+            </p>
+        </details>
+
+        <details open>
+            <summary>🧪 Composizione rifiuti & Stoccaggio</summary>
+            <div style="overflow-x:auto; margin-top:0.5rem;">
+                <table id="tabella_composizione" style="font-size:0.7rem; color:#ddd;">
+                    <thead>
+                        <tr>
+                            <th>Tipologia</th><th>% peso</th><th>Peso (kg)</th><th>Densità (kg/m³)</th>
+                            <th>Vol red %</th><th>Massa red %</th><th>Cap. stoccaggio (m³)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <p id="error_percentuale" style="color:#f87171;font-weight:600;margin-top:0.5rem;"></p>
+        </details>
+
+        <details open>
+            <summary>🚛 Veicoli di trasporto</summary>
+            <div id="veicoli_container"></div>
+            <p style="font-size:0.65rem;color:#777;margin-top:0.3rem;">Impostare payload=0 per disattivare un veicolo.</p>
+        </details>
+
+        <div style="display:flex;gap:0.5rem;margin-top:0.3rem;">
+            <button class="btn btn-primary" id="btn_reset">↺ Ripristina default</button>
+        </div>
+        <p style="font-size:0.65rem;color:#777;margin-top:0.5rem;">
+            I calcoli sono aggiornati in tempo reale.
+        </p>
+    </aside>
+
+    <!-- MAIN OUTPUT -->
+    <main class="main">
+        <h1>Dashboard – Gestione Rifiuti in Quota</h1>
+
+        <!-- KPI -->
+        <div class="card">
+            <h3>📊 Riepilogo stagionale</h3>
+            <div class="kpi-row" id="kpi_container">
+                <div class="kpi"><span class="value" id="kpi_peso_pre">—</span><span class="label">Peso tot pre-tratt. (kg)</span></div>
+                <div class="kpi"><span class="value" id="kpi_peso_post">—</span><span class="label">Peso tot post-tratt. (kg)</span></div>
+                <div class="kpi"><span class="value" id="kpi_vol_pre">—</span><span class="label">Volume pre-tratt. (m³)</span></div>
+                <div class="kpi"><span class="value" id="kpi_vol_post">—</span><span class="label">Volume post-tratt. (m³)</span></div>
+                <div class="kpi"><span class="value" id="kpi_riduzione_massa">—</span><span class="label">Rid. massa totale (%)</span></div>
+                <div class="kpi"><span class="value" id="kpi_riduzione_volume">—</span><span class="label">Rid. volume totale (%)</span></div>
+            </div>
+        </div>
+
+        <!-- Pannello limiti di stoccaggio -->
+        <div class="card" id="card_stoccaggio">
+            <h3>📦 Limiti di stoccaggio e giorni di superamento</h3>
+            <div id="stoccaggio_alerts"></div>
+            <table id="tabella_stoccaggio">
+                <thead>
+                    <tr><th>Tipologia</th><th>Capacità (m³)</th><th>Vol. giornaliero (m³)</th><th>Giorno superamento</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <p id="msg_90giorni" style="margin-top:0.5rem;"></p>
+        </div>
+
+        <!-- Tabella dettaglio rifiuti -->
+        <div class="card">
+            <h3>🧪 Dettaglio rifiuti post‑trattamento</h3>
+            <div style="overflow-x:auto;">
+                <table id="tabella_dettaglio_rifiuti">
+                    <thead>
+                        <tr>
+                            <th>Tipologia</th><th>Peso pre (kg)</th><th>Volume pre (m³)</th><th>Peso post (kg)</th><th>Volume post (m³)</th><th>% peso totale</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tabella veicoli -->
+        <div class="card">
+            <h3>🚁 Logistica e costi</h3>
+            <table id="tabella_veicoli_output">
+                <thead>
+                    <tr><th>Veicolo</th><th>Payload eff. (kg)</th><th>Viaggi</th><th>Costo tot (€)</th><th>Costo/kg (€)</th><th>Sat. media</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Grafici -->
+        <div class="charts-grid">
+            <div class="chart-container"><canvas id="chart_doughnut"></canvas></div>
+            <div class="chart-container"><canvas id="chart_bar"></canvas></div>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            // --- VALORI DI DEFAULT ---
+            const DEFAULTS = {
+                periodo_giorni: 60,
+                posti_letto: 50,
+                coeff_utilizzo_letti: 0.6,
+                coperti: 80,
+                coeff_utilizzo_coperti: 0.5,
+                escursionisti_giorno: 30,
+                rifiuti_ospite_giorno: 0.20,
+                rifiuti_escursionista_giorno: 0.10,
+                grigliato_ospite_giorno: 0.2,   // sempre attivo
+                presenza_compattatore: false,
+                composizione: [
+                    { nome: 'Organico', perc: 45, densita: 700, volRed: 0, massaRed: 0, capStoccaggio: 1.5 },
+                    { nome: 'Plastica', perc: 12, densita: 60, volRed: 0, massaRed: 0, capStoccaggio: 2.0 },
+                    { nome: 'Vetro', perc: 18, densita: 1000, volRed: 0, massaRed: 0, capStoccaggio: 1.0 },
+                    { nome: 'Metalli', perc: 5, densita: 400, volRed: 0, massaRed: 0, capStoccaggio: 1.0 },
+                    { nome: 'Cartone', perc: 10, densita: 100, volRed: 0, massaRed: 0, capStoccaggio: 2.0 },
+                    { nome: 'Altro/indiff.', perc: 10, densita: 300, volRed: 0, massaRed: 0, capStoccaggio: 1.5 }
+                ],
+                veicoli: [
+                    { nome: 'Elicottero', payload: 500, costoFisso: 450, costoVario: 30, tempoViaggio: 15, fattoreRiemp: 0.9 },
+                    { nome: 'Drone cargo', payload: 100, costoFisso: 0, costoVario: 0.5, tempoViaggio: 10, fattoreRiemp: 0.95 },
+                    { nome: 'Teleferica', payload: 300, costoFisso: 10, costoVario: 0, tempoViaggio: 0, fattoreRiemp: 1.0 },
+                    { nome: 'Mezzo terra', payload: 2000, costoFisso: 50, costoVario: 0, tempoViaggio: 0, fattoreRiemp: 1.0 }
+                ]
+            };
+
+            let state = JSON.parse(JSON.stringify(DEFAULTS));
+
+            // Riferimenti DOM
+            const ids = [
+                'periodo_giorni', 'posti_letto', 'coeff_utilizzo_letti', 'coperti', 'coeff_utilizzo_coperti',
+                'escursionisti_giorno', 'rifiuti_ospite_giorno', 'rifiuti_escursionista_giorno', 'grigliato_ospite_giorno'
+            ];
+            const els = {};
+            ids.forEach(id => { els[id] = document.getElementById(id); });
+            const chkCompattatore = document.getElementById('presenza_compattatore');
+            const tbodyComp = document.querySelector('#tabella_composizione tbody');
+            const tbodyDett = document.querySelector('#tabella_dettaglio_rifiuti tbody');
+            const tbodyStocc = document.querySelector('#tabella_stoccaggio tbody');
+            const tbodyVeicOut = document.querySelector('#tabella_veicoli_output tbody');
+            const errorPerc = document.getElementById('error_percentuale');
+            const stoccaggioAlerts = document.getElementById('stoccaggio_alerts');
+            const msg90giorni = document.getElementById('msg_90giorni');
+            const veicoliContainer = document.getElementById('veicoli_container');
+
+            // Charts
+            let chartDoughnut, chartBar;
+
+            function initCharts() {
+                const ctx1 = document.getElementById('chart_doughnut').getContext('2d');
+                const ctx2 = document.getElementById('chart_bar').getContext('2d');
+                chartDoughnut = new Chart(ctx1, {
+                    type: 'doughnut',
+                    data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 11 } } } } }
+                });
+                chartBar = new Chart(ctx2, {
+                    type: 'bar',
+                    data: { labels: [], datasets: [
+                            { label: 'Volume pre (m³)', data: [], backgroundColor: 'rgba(139,0,0,0.5)',
+                                borderColor: '#8B0000', borderWidth: 1 },
+                            { label: 'Volume post (m³)', data: [], backgroundColor: 'rgba(45,106,79,0.5)',
+                                borderColor: '#2d6a4f', borderWidth: 1 }
+                        ] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true,
+                                title: { display: true, text: 'Metri cubi (m³)' } } }, plugins: { legend: { position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 11 } } } } }
+                });
+            }
+
+            function buildVeicoliInputs() {
+                veicoliContainer.innerHTML = '';
+                state.veicoli.forEach((v, i) => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'margin-bottom:0.8rem;padding:0.6rem;background:#2a2a2a;border-radius:6px;';
+                    div.innerHTML = `
+                        <strong style="color:#ddd;font-size:0.85rem;">${v.nome}</strong>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;margin-top:0.3rem;">
+                            <label>Payload (kg)</label><input type="number" data-veicolo="${i}" data-field="payload" value="${v.payload}" min="0" step="1">
+                            <label>Costo fisso (€)</label><input type="number" data-veicolo="${i}" data-field="costoFisso" value="${v.costoFisso}" min="0" step="0.01">
+                            <label>Costo variab. (€/min)</label><input type="number" data-veicolo="${i}" data-field="costoVario" value="${v.costoVario}" min="0" step="0.01">
+                            <label>Tempo viaggio (min)</label><input type="number" data-veicolo="${i}" data-field="tempoViaggio" value="${v.tempoViaggio}" min="0" step="0.1">
+                            <label>Fattore riempim. (0-1)</label><input type="number" data-veicolo="${i}" data-field="fattoreRiemp" value="${v.fattoreRiemp}" min="0" max="1" step="0.01">
+                        </div>
+                        <p class="veicolo-disattivato" style="display:${v.payload === 0 ? 'block' : 'none'};">* Veicolo disattivato</p>`;
+                    veicoliContainer.appendChild(div);
+                });
+            }
+
+            function buildComposizioneTable() {
+                tbodyComp.innerHTML = '';
+                state.composizione.forEach((c, i) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight:600;">${c.nome}</td>
+                        <td><input type="number" class="input-perc" data-comp="${i}" data-field="perc" value="${c.perc.toFixed(1)}" min="0" max="100" step="0.1"></td>
+                        <td><input type="number" class="input-kg large" data-comp="${i}" data-field="kg" value="0" min="0" step="0.1"></td>
+                        <td><input type="number" class="large" data-comp="${i}" data-field="densita" value="${c.densita}" min="1" step="1"></td>
+                        <td><input type="number" data-comp="${i}" data-field="volRed" value="${c.volRed}" min="0" max="100" step="0.5"></td>
+                        <td><input type="number" data-comp="${i}" data-field="massaRed" value="${c.massaRed}" min="0" max="100" step="0.5"></td>
+                        <td><input type="number" class="large" data-comp="${i}" data-field="capStoccaggio" value="${c.capStoccaggio}" min="0" step="0.1"></td>`;
+                    tbodyComp.appendChild(tr);
+                });
+            }
+
+            function syncStateFromDOM() {
+                state.periodo_giorni = parseFloat(els.periodo_giorni.value) || 0;
+                state.posti_letto = parseFloat(els.posti_letto.value) || 0;
+                state.coeff_utilizzo_letti = parseFloat(els.coeff_utilizzo_letti.value) || 0;
+                state.coperti = parseFloat(els.coperti.value) || 0;
+                state.coeff_utilizzo_coperti = parseFloat(els.coeff_utilizzo_coperti.value) || 0;
+                state.escursionisti_giorno = parseFloat(els.escursionisti_giorno.value) || 0;
+                state.rifiuti_ospite_giorno = parseFloat(els.rifiuti_ospite_giorno.value) || 0;
+                state.rifiuti_escursionista_giorno = parseFloat(els.rifiuti_escursionista_giorno.value) || 0;
+                state.grigliato_ospite_giorno = parseFloat(els.grigliato_ospite_giorno.value) || 0;
+                state.presenza_compattatore = chkCompattatore.checked;
+
+                // composizione
+                document.querySelectorAll('#tabella_composizione tbody tr').forEach((tr, i) => {
+                    if (i < state.composizione.length) {
+                        const c = state.composizione[i];
+                        c.perc = parseFloat(tr.querySelector('.input-perc')?.value) || 0;
+                        c.densita = parseFloat(tr.querySelector('[data-field="densita"]')?.value) || 1;
+                        c.volRed = parseFloat(tr.querySelector('[data-field="volRed"]')?.value) || 0;
+                        c.massaRed = parseFloat(tr.querySelector('[data-field="massaRed"]')?.value) || 0;
+                        c.capStoccaggio = parseFloat(tr.querySelector('[data-field="capStoccaggio"]')?.value) || 0;
+                    }
+                });
+
+                // veicoli
+                document.querySelectorAll('#veicoli_container input').forEach(inp => {
+                    const i = parseInt(inp.dataset.veicolo);
+                    const field = inp.dataset.field;
+                    if (i >= 0 && i < state.veicoli.length) {
+                        state.veicoli[i][field] = parseFloat(inp.value) || 0;
+                    }
+                });
+            }
+
+            function redistribuisciPercentuali(escludiIndice = -1) {
+                const righeBase = state.composizione; // tutte le righe base (senza grigliato)
+                let somma = righeBase.reduce((acc, c) => acc + c.perc, 0);
+                if (escludiIndice >= 0 && escludiIndice < righeBase.length) {
+                    const esclusa = righeBase[escludiIndice];
+                    const resto = somma - esclusa.perc;
+                    if (resto <= 0) {
+                        righeBase.forEach((c, idx) => { c.perc = (idx === escludiIndice) ? 100 : 0; });
+                    } else {
+                        const targetResto = 100 - esclusa.perc;
+                        righeBase.forEach((c, idx) => {
+                            if (idx !== escludiIndice) {
+                                c.perc = (c.perc / resto) * targetResto;
+                            }
+                        });
+                    }
+                }
+                somma = righeBase.reduce((acc, c) => acc + c.perc, 0);
+                if (somma > 0) {
+                    const diff = 100 - somma;
+                    if (escludiIndice >= 0) {
+                        const idx = (escludiIndice + 1) % righeBase.length;
+                        righeBase[idx].perc += diff;
+                    } else {
+                        righeBase[0].perc += diff;
+                    }
+                }
+                righeBase.forEach(c => { c.perc = Math.min(100, Math.max(0, c.perc)); });
+            }
+
+            function validatePercentuale() {
+                const somma = state.composizione.reduce((acc, c) => acc + c.perc, 0);
+                const ok = Math.abs(somma - 100) < 0.01;
+                if (!ok) {
+                    errorPerc.textContent = `⚠️ La somma delle percentuali è ${somma.toFixed(1)}% (deve essere 100%).`;
+                } else {
+                    errorPerc.textContent = '';
+                }
+                document.querySelectorAll('#tabella_composizione tbody .input-perc').forEach(inp => {
+                    inp.classList.toggle('invalid', !ok);
+                });
+                return ok;
+            }
+
+            function validateAllInputs() {
+                let valid = true;
+                document.querySelectorAll('input[type="number"]').forEach(inp => {
+                    const val = inp.value.trim();
+                    if (val === '' || isNaN(parseFloat(val)) || parseFloat(val) < 0) {
+                        inp.classList.add('invalid');
+                        valid = false;
+                    } else {
+                        inp.classList.remove('invalid');
+                    }
+                });
+                return valid;
+            }
+
+            function calcola() {
+                syncStateFromDOM();
+                const validInputs = validateAllInputs();
+                if (!validInputs) {
+                    clearOutputs();
+                    return;
+                }
+
+                const s = state;
+                const gg = s.periodo_giorni;
+                const ospitiNotte = s.posti_letto * s.coeff_utilizzo_letti;
+                const W_base = ospitiNotte * gg * s.rifiuti_ospite_giorno + s.escursionisti_giorno * gg * s.rifiuti_escursionista_giorno;
+                const W_grigliato = ospitiNotte * gg * s.grigliato_ospite_giorno;  // sempre calcolato, anche se 0
+                const W_totale_pre = W_base + W_grigliato;
+
+                // Aggiorna i campi kg in base alle percentuali
+                document.querySelectorAll('#tabella_composizione tbody tr').forEach((tr, i) => {
+                    if (i < state.composizione.length) {
+                        const c = state.composizione[i];
+                        const kgInput = tr.querySelector('.input-kg');
+                        if (kgInput && c.nome !== 'Grigliato') {
+                            kgInput.value = (W_base * c.perc / 100).toFixed(1);
+                        }
+                    }
+                });
+
+                const validPerc = validatePercentuale();
+                if (!validPerc) {
+                    clearOutputs();
+                    return;
+                }
+
+                // Dettaglio rifiuti (includendo grigliato solo se > 0)
+                const dettaglio = [];
+                s.composizione.forEach(c => {
+                    const pesoPre = W_base * (c.perc / 100);
+                    const densita = c.densita > 0 ? c.densita : 1;
+                    const volPre = pesoPre / densita;
+                    dettaglio.push({
+                        nome: c.nome,
+                        pesoPre: pesoPre,
+                        volPre: volPre,
+                        densita: densita,
+                        volRed: c.volRed,
+                        massaRed: c.massaRed,
+                        capStoccaggio: c.capStoccaggio
+                    });
+                });
+                if (W_grigliato > 0) {
+                    const densGrigliato = 900;
+                    const volGrig = W_grigliato / densGrigliato;
+                    dettaglio.push({
+                        nome: 'Grigliato',
+                        pesoPre: W_grigliato,
+                        volPre: volGrig,
+                        densita: densGrigliato,
+                        volRed: 0,
+                        massaRed: 0,
+                        capStoccaggio: 0.8
+                    });
+                }
+
+                // Applica trattamento
+                let W_totale_post = 0;
+                let V_totale_pre = 0;
+                let V_totale_post = 0;
+                dettaglio.forEach(d => {
+                    const redM = s.presenza_compattatore ? d.massaRed : 0;
+                    const redV = s.presenza_compattatore ? d.volRed : 0;
+                    d.pesoPost = d.pesoPre * (1 - redM / 100);
+                    d.volPost = d.volPre * (1 - redV / 100);
+                    W_totale_post += d.pesoPost;
+                    V_totale_pre += d.volPre;
+                    V_totale_post += d.volPost;
+                });
+
+                const ridMassa = W_totale_pre > 0 ? ((W_totale_pre - W_totale_post) / W_totale_pre * 100) : 0;
+                const ridVolume = V_totale_pre > 0 ? ((V_totale_pre - V_totale_post) / V_totale_pre * 100) : 0;
+
+                // KPI
+                document.getElementById('kpi_peso_pre').textContent = W_totale_pre.toFixed(1);
+                document.getElementById('kpi_peso_post').textContent = W_totale_post.toFixed(1);
+                document.getElementById('kpi_vol_pre').textContent = V_totale_pre.toFixed(3);
+                document.getElementById('kpi_vol_post').textContent = V_totale_post.toFixed(3);
+                document.getElementById('kpi_riduzione_massa').textContent = ridMassa.toFixed(1) + '%';
+                document.getElementById('kpi_riduzione_volume').textContent = ridVolume.toFixed(1) + '%';
+
+                // Tabella dettaglio rifiuti
+                tbodyDett.innerHTML = '';
+                dettaglio.forEach(d => {
+                    const percPost = W_totale_post > 0 ? (d.pesoPost / W_totale_post * 100) : 0;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight:600;">${d.nome}</td>
+                        <td>${d.pesoPre.toFixed(1)}</td>
+                        <td>${d.volPre.toFixed(3)}</td>
+                        <td>${d.pesoPost.toFixed(1)}</td>
+                        <td>${d.volPost.toFixed(3)}</td>
+                        <td>${percPost.toFixed(1)}%</td>`;
+                    tbodyDett.appendChild(tr);
+                });
+
+                // Limiti di stoccaggio
+                tbodyStocc.innerHTML = '';
+                stoccaggioAlerts.innerHTML = '';
+                msg90giorni.innerHTML = '';
+                const periodoGG = gg;
+                let giornoCriticoMin = Infinity;
+                let causaCritica = '';
+                dettaglio.forEach(d => {
+                    const volGiorn = periodoGG > 0 ? d.volPost / periodoGG : 0;
+                    let giornoSup = Infinity;
+                    if (volGiorn > 0 && d.capStoccaggio > 0) {
+                        giornoSup = Math.ceil(d.capStoccaggio / volGiorn);
+                    }
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight:600;">${d.nome}</td>
+                        <td>${d.capStoccaggio.toFixed(2)}</td>
+                        <td>${volGiorn.toFixed(4)}</td>
+                        <td>${giornoSup <= periodoGG ? giornoSup : 'Mai'}</td>`;
+                    if (giornoSup <= periodoGG) {
+                        tr.style.background = '#fff3cd';
+                        if (giornoSup < giornoCriticoMin) {
+                            giornoCriticoMin = giornoSup;
+                            causaCritica = d.nome;
+                        }
+                    }
+                    tbodyStocc.appendChild(tr);
+                });
+
+                if (giornoCriticoMin < Infinity) {
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert-box';
+                    alertDiv.textContent = `⚠️ Superamento capacità stoccaggio per "${causaCritica}" al giorno ${giornoCriticoMin}. Necessario svuotamento.`;
+                    stoccaggioAlerts.appendChild(alertDiv);
+                }
+                if (periodoGG > 90) {
+                    const alert90 = document.createElement('div');
+                    alert90.className = 'alert-box alert-danger';
+                    alert90.textContent = `⚠️ Periodo operativo supera 90 giorni (D.Lgs. 152/2006). Primo svuotamento obbligatorio entro il giorno 90.`;
+                    stoccaggioAlerts.appendChild(alert90);
+                    if (90 < giornoCriticoMin) {
+                        giornoCriticoMin = 90;
+                        causaCritica = 'Limite normativo 90 gg';
+                    }
+                }
+                if (giornoCriticoMin < Infinity) {
+                    msg90giorni.innerHTML = `<strong>Giorno critico più vicino:</strong> ${giornoCriticoMin} (${causaCritica})`;
+                }
+
+                // Veicoli
+                tbodyVeicOut.innerHTML = '';
+                s.veicoli.forEach(v => {
+                    if (v.payload === 0) {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td style="font-weight:600;">${v.nome}</td><td colspan="5">N/D – Veicolo disattivato</td>`;
+                        tbodyVeicOut.appendChild(tr);
+                        return;
+                    }
+                    const payloadEff = v.payload * v.fattoreRiemp;
+                    let viaggi = 0, costoTot = 0, costoKg = 0, satMedia = 0;
+                    if (payloadEff > 0 && W_totale_post > 0) {
+                        viaggi = Math.ceil(W_totale_post / payloadEff);
+                        const costoViaggio = v.costoFisso + v.costoVario * v.tempoViaggio;
+                        costoTot = viaggi * costoViaggio;
+                        costoKg = costoTot / W_totale_post;
+                        satMedia = (W_totale_post / (viaggi * v.payload)) * 100;
+                    }
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight:600;">${v.nome}</td>
+                        <td>${payloadEff.toFixed(0)}</td>
+                        <td>${viaggi}</td>
+                        <td>${costoTot.toFixed(0)}</td>
+                        <td>${costoKg.toFixed(2)}</td>
+                        <td>${satMedia.toFixed(0)}%</td>`;
+                    tbodyVeicOut.appendChild(tr);
+                });
+
+                // Charts
+                const labelsDough = dettaglio.map(d => d.nome);
+                const dataDough = dettaglio.map(d => d.pesoPost);
+                const colors = [
+                    '#8B0000', '#a0522d', '#b8860b', '#556b2f', '#2f4f4f', '#708090', '#6a5acd', '#9932cc'
+                ];
+                updateCharts(labelsDough, dataDough, dettaglio.map(d => d.volPre), dettaglio.map(d => d.volPost), colors);
+            }
+
+            function clearOutputs() {
+                ['kpi_peso_pre', 'kpi_peso_post', 'kpi_vol_pre', 'kpi_vol_post', 'kpi_riduzione_massa', 'kpi_riduzione_volume']
+                    .forEach(id => document.getElementById(id).textContent = '—');
+                tbodyDett.innerHTML = '';
+                tbodyStocc.innerHTML = '';
+                stoccaggioAlerts.innerHTML = '';
+                msg90giorni.innerHTML = '';
+                tbodyVeicOut.innerHTML = '';
+                updateCharts([], [], [], [], []);
+            }
+
+            function updateCharts(labels, doughData, volPre, volPost, colors) {
+                chartDoughnut.data.labels = labels;
+                chartDoughnut.data.datasets[0].data = doughData;
+                chartDoughnut.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
+                chartDoughnut.update();
+                chartBar.data.labels = labels;
+                chartBar.data.datasets[0].data = volPre;
+                chartBar.data.datasets[1].data = volPost;
+                chartBar.update();
+            }
+
+            function resetToDefaults() {
+                state = JSON.parse(JSON.stringify(DEFAULTS));
+                els.periodo_giorni.value = state.periodo_giorni;
+                els.posti_letto.value = state.posti_letto;
+                els.coeff_utilizzo_letti.value = state.coeff_utilizzo_letti;
+                els.coperti.value = state.coperti;
+                els.coeff_utilizzo_coperti.value = state.coeff_utilizzo_coperti;
+                els.escursionisti_giorno.value = state.escursionisti_giorno;
+                els.rifiuti_ospite_giorno.value = state.rifiuti_ospite_giorno;
+                els.rifiuti_escursionista_giorno.value = state.rifiuti_escursionista_giorno;
+                els.grigliato_ospite_giorno.value = state.grigliato_ospite_giorno;
+                chkCompattatore.checked = state.presenza_compattatore;
+                buildComposizioneTable();
+                buildVeicoliInputs();
+                document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+                errorPerc.textContent = '';
+                calcola();
+            }
+
+            function attachEvents() {
+                [...Object.values(els), chkCompattatore].forEach(el => {
+                    if (el) el.addEventListener('input', calcola);
+                });
+                chkCompattatore.addEventListener('change', calcola);
+
+                tbodyComp.addEventListener('input', (e) => {
+                    const inp = e.target;
+                    if (!inp.dataset.comp) return;
+                    const i = parseInt(inp.dataset.comp);
+                    const field = inp.dataset.field;
+                    if (i < 0 || i >= state.composizione.length) return;
+
+                    if (field === 'perc') {
+                        const nuovaPerc = parseFloat(inp.value) || 0;
+                        state.composizione[i].perc = Math.min(100, Math.max(0, nuovaPerc));
+                        redistribuisciPercentuali(i);
+                        buildComposizioneTable();
+                    } else if (field === 'kg') {
+                        const nuoviKg = parseFloat(inp.value) || 0;
+                        const gg = parseFloat(els.periodo_giorni.value) || 0;
+                        const ospitiNotte = (parseFloat(els.posti_letto.value) || 0) * (parseFloat(els.coeff_utilizzo_letti.value) || 0);
+                        const W_base_calc = ospitiNotte * gg * (parseFloat(els.rifiuti_ospite_giorno.value) || 0) +
+                            (parseFloat(els.escursionisti_giorno.value) || 0) * gg * (parseFloat(els.rifiuti_escursionista_giorno.value) || 0);
+                        if (W_base_calc > 0) {
+                            const nuovaPerc = (nuoviKg / W_base_calc) * 100;
+                            state.composizione[i].perc = Math.min(100, Math.max(0, nuovaPerc));
+                            redistribuisciPercentuali(i);
+                            buildComposizioneTable();
+                        }
+                    }
+                    calcola();
+                });
+
+                tbodyComp.addEventListener('change', (e) => {
+                    if (e.target.dataset.field === 'perc' || e.target.dataset.field === 'kg') {
+                        calcola();
+                    }
+                });
+
+                veicoliContainer.addEventListener('input', (e) => {
+                    if (e.target.dataset.veicolo) {
+                        const i = parseInt(e.target.dataset.veicolo);
+                        const field = e.target.dataset.field;
+                        state.veicoli[i][field] = parseFloat(e.target.value) || 0;
+                        const div = e.target.closest('div');
+                        const commentEl = div?.querySelector('.veicolo-disattivato');
+                        if (commentEl && field === 'payload') {
+                            commentEl.style.display = state.veicoli[i].payload === 0 ? 'block' : 'none';
+                        }
+                        calcola();
+                    }
+                });
+
+                document.getElementById('btn_reset').addEventListener('click', resetToDefaults);
+            }
+
+            function init() {
+                buildComposizioneTable();
+                buildVeicoliInputs();
+                initCharts();
+                attachEvents();
+                calcola();
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
