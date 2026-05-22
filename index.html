@@ -4,26 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulatore Gestione Rifiuti – Rifugi Alpini</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
-            --primary: #8B0000;
-            --primary-dark: #5c0000;
-            --primary-light: #a00000;
-            --bg: #f5f5f0;
+            --primary: #b91c3c;
+            --primary-dark: #7f1029;
+            --primary-light: #e11d48;
+            --accent: #0d9488;
+            --accent-soft: #ccfbf1;
+            --bg: #f4f6f9;
             --bg-card: #ffffff;
-            --bg-sidebar: #1a1a1a;
-            --text: #222;
-            --text-light: #666;
-            --text-sidebar: #ddd;
-            --border: #d0d0c8;
-            --success: #2d6a4f;
-            --warning: #e07b00;
-            --danger: #c1121f;
-            --radius: 8px;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-            --transition: 0.2s ease;
+            --bg-sidebar: #0f172a;
+            --bg-sidebar-panel: rgba(255, 255, 255, 0.04);
+            --bg-sidebar-panel-open: rgba(255, 255, 255, 0.07);
+            --text: #1e293b;
+            --text-light: #64748b;
+            --text-sidebar: #cbd5e1;
+            --border: #e2e8f0;
+            --border-sidebar: rgba(255, 255, 255, 0.08);
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
+            --shadow-hover: 0 4px 6px rgba(15, 23, 42, 0.05), 0 16px 40px rgba(15, 23, 42, 0.1);
+            --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
         }
         * {
             box-sizing: border-box;
@@ -31,470 +40,773 @@
             padding: 0;
         }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             background: var(--bg);
+            background-image:
+                radial-gradient(ellipse 70% 45% at 90% 0%, rgba(185, 28, 60, 0.07), transparent),
+                radial-gradient(ellipse 50% 35% at 5% 95%, rgba(13, 148, 136, 0.06), transparent);
             color: var(--text);
-            display: flex;
             min-height: 100vh;
-            line-height: 1.5;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 900px;
-            min-width: 900px;
-            background: var(--bg-sidebar);
-            color: var(--text-sidebar);
-            padding: 1.5rem 1.2rem;
-            overflow-y: auto;
-            max-height: 100vh;
-            position: sticky;
-            top: 0;
+        .app {
             display: flex;
             flex-direction: column;
-            gap: 0.8rem;
-            scrollbar-width: thin;
-            scrollbar-color: #444 #1a1a1a;
+            min-height: 100vh;
         }
-        .sidebar::-webkit-scrollbar {
-            width: 6px;
+
+        /* HEADER */
+        .site-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.85rem 1.5rem;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #334155 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-shrink: 0;
         }
-        .sidebar::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 3px;
+        .site-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
         }
-        .sidebar h2 {
-            font-size: 1.35rem;
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 12px rgba(185, 28, 60, 0.4);
+        }
+        .brand-text h1 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #f8fafc;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+        .brand-text p {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .live-badge {
+            font-size: 0.7rem;
             font-weight: 700;
-            color: #fff;
-            letter-spacing: -0.3px;
-            border-left: 4px solid var(--primary);
-            padding-left: 0.7rem;
-            margin-bottom: 0.2rem;
-        }
-        .sidebar details {
-            background: #222;
-            border-radius: 6px;
-            padding: 0.6rem 0.8rem;
-        }
-        .sidebar details[open] {
-            background: #2a2a2a;
-        }
-        .sidebar summary {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #ccc;
-            cursor: pointer;
-            outline: none;
-            list-style: none;
+            color: #6ee7b7;
+            background: rgba(5, 150, 105, 0.2);
+            border: 1px solid rgba(110, 231, 183, 0.35);
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
             display: flex;
             align-items: center;
             gap: 0.4rem;
         }
-        .sidebar summary::-webkit-details-marker {
-            display: none;
+        .live-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: #34d399;
+            border-radius: 50%;
+            animation: pulse 2s ease infinite;
         }
-        .sidebar summary::before {
-            content: "▸";
-            display: inline-block;
-            transition: transform 0.2s;
-            font-size: 0.8rem;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
-        .sidebar details[open] summary::before {
-            transform: rotate(90deg);
+
+        /* WORKSPACE */
+        .workspace {
+            display: grid;
+            grid-template-columns: minmax(340px, 420px) 1fr;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
         }
-        .sidebar label {
-            font-size: 0.8rem;
-            color: #bbb;
+
+        /* PANEL CONFIG (sinistra) */
+        .panel-config {
+            background: #f8fafc;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 58px);
+            position: sticky;
+            top: 58px;
+        }
+        .panel-config-head {
+            padding: 1.1rem 1.15rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+            background: #fff;
+            flex-shrink: 0;
+        }
+        .panel-config-head h2 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+        .panel-config-head p {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.2rem;
+        }
+        .config-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.85rem 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            scrollbar-width: thin;
+        }
+        .config-block {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.9rem 1rem;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+        .config-block-wide {
+            padding-bottom: 0.75rem;
+        }
+        .block-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--primary-dark);
+            margin-bottom: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .block-title .num {
+            width: 1.35rem;
+            height: 1.35rem;
+            border-radius: 6px;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: #fff;
+            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fields-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.55rem 0.65rem;
+        }
+        .field-full { grid-column: 1 / -1; }
+        .panel-config label {
+            font-size: 0.7rem;
+            color: var(--text-light);
             display: block;
             margin-bottom: 0.2rem;
-            font-weight: 500;
+            font-weight: 600;
+            line-height: 1.3;
         }
-        .sidebar input[type="number"] {
+        .panel-config input[type="number"] {
             width: 100%;
-            padding: 0.5rem 0.6rem;
-            border: 1px solid #444;
-            border-radius: 5px;
-            background: #2a2a2a;
-            color: #eee;
-            font-size: 0.85rem;
+            padding: 0.48rem 0.55rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            color: var(--text);
+            font-size: 0.84rem;
+            font-family: inherit;
             transition: var(--transition);
         }
-        .sidebar input[type="number"]:focus {
+        .panel-config input[type="number"]:hover {
+            border-color: #cbd5e1;
+        }
+        .panel-config input[type="number"]:focus {
             outline: none;
             border-color: var(--primary-light);
-            box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.25);
+            box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
         }
-        .sidebar input.invalid {
+        .panel-config input.invalid {
             border-color: var(--danger) !important;
-            background: #3a1a1a !important;
+            background: #fef2f2 !important;
+        }
+        .panel-config .table-wrap {
+            margin-top: 0.35rem;
+            border-color: var(--border);
+        }
+        .panel-config table { font-size: 0.68rem; }
+        .panel-config th {
+            background: #f1f5f9;
+            color: var(--text);
+            font-size: 0.62rem;
+            padding: 0.45rem 0.35rem;
+        }
+        .panel-config td {
+            padding: 0.4rem 0.35rem;
+            color: var(--text);
+        }
+        .panel-config td input {
+            width: 72px;
+            padding: 0.28rem 0.35rem;
+            font-size: 0.75rem;
+            background: #fff;
+            border-color: var(--border);
+            color: var(--text);
+        }
+        .panel-config td input.large { width: 88px; }
+        .panel-config td:first-child {
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.72rem;
+            white-space: nowrap;
         }
         .checkbox-group {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0.5rem 0;
+            align-items: flex-start;
+            gap: 0.6rem;
+            padding: 0.65rem 0.75rem;
+            background: linear-gradient(135deg, #fef2f2, #fff);
+            border: 1px solid #fecdd3;
+            border-radius: var(--radius-sm);
         }
         .checkbox-group input[type="checkbox"] {
             width: 18px;
             height: 18px;
-            accent-color: var(--primary-light);
+            accent-color: var(--primary);
             cursor: pointer;
+            margin-top: 2px;
+            flex-shrink: 0;
         }
         .checkbox-group label {
             margin: 0;
             cursor: pointer;
-            color: #ddd;
-            font-size: 0.85rem;
+            color: var(--text);
+            font-size: 0.82rem;
+            font-weight: 600;
+            line-height: 1.35;
         }
+        .hint-text {
+            font-size: 0.68rem;
+            color: var(--text-light);
+            margin-top: 0.4rem;
+            line-height: 1.4;
+        }
+        #error_percentuale {
+            color: var(--danger) !important;
+            font-weight: 600;
+            margin-top: 0.45rem;
+            font-size: 0.72rem;
+        }
+        .veicoli-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.55rem;
+        }
+        .veicolo-card {
+            padding: 0.65rem 0.7rem;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        .veicolo-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+        }
+        .veicolo-card strong {
+            color: var(--text);
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 0.4rem;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .veicolo-grid-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .veicolo-grid-inner label {
+            font-size: 0.65rem;
+            margin-bottom: 0.1rem;
+        }
+        .veicolo-disattivato {
+            font-size: 0.65rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 0.25rem;
+        }
+        .tooltip-text {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
         .btn {
             padding: 0.55rem 1rem;
             border: none;
-            border-radius: 5px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: inherit;
             transition: var(--transition);
-            letter-spacing: 0.3px;
         }
         .btn-primary {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
             color: #fff;
+            box-shadow: 0 3px 12px rgba(185, 28, 60, 0.3);
         }
         .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #666;
-            color: #ccc;
-        }
-        .btn-outline:hover {
-            background: #333;
-            border-color: #888;
-        }
-        .error-msg {
-            color: #f87171;
-            font-size: 0.75rem;
-            margin-top: 0.2rem;
-            min-height: 1em;
-        }
-        .tooltip-text {
-            font-size: 0.7rem;
-            color: #888;
-            margin-left: 0.3rem;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 16px rgba(185, 28, 60, 0.4);
         }
 
-        /* MAIN */
-        .main {
-            flex: 1;
-            padding: 1.8rem 2rem;
+        /* PANEL DASHBOARD (destra) */
+        .panel-dashboard {
+            padding: 1.25rem 1.5rem 2rem;
             overflow-y: auto;
-            max-height: 100vh;
+            max-height: calc(100vh - 58px);
             display: flex;
             flex-direction: column;
-            gap: 1.6rem;
+            gap: 1.15rem;
         }
-        .main h1 {
-            font-size: 1.7rem;
+        .dash-intro .eyebrow {
+            font-size: 0.68rem;
             font-weight: 700;
-            color: var(--primary-dark);
-            letter-spacing: -0.4px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+        }
+        .dash-intro h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-top: 0.2rem;
+            color: var(--text);
+        }
+        .dash-intro p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.3rem;
+            max-width: 55ch;
         }
 
-        /* CARDS */
+        /* KPI BAND */
+        .kpi-band {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.65rem;
+        }
+        .kpi {
+            background: #fff;
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 0.65rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi:nth-child(1)::before,
+        .kpi:nth-child(2)::before { background: var(--primary); }
+        .kpi:nth-child(3)::before,
+        .kpi:nth-child(4)::before { background: var(--accent); }
+        .kpi:nth-child(5)::before,
+        .kpi:nth-child(6)::before { background: var(--warning); }
+        .kpi::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        .kpi .value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.02em;
+            display: block;
+            line-height: 1.2;
+        }
+        .kpi .label {
+            font-size: 0.62rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+            display: block;
+            margin-top: 0.3rem;
+            line-height: 1.3;
+        }
+
+        /* CARDS & GRID */
         .card {
             background: var(--bg-card);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            padding: 1.2rem 1.4rem;
-        }
-        .card h3 {
-            font-size: 1rem;
-            margin-bottom: 0.8rem;
-            color: var(--primary-dark);
-            font-weight: 700;
-        }
-        .kpi-row {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .kpi {
-            background: #f9f9f6;
-            border-radius: 6px;
-            padding: 0.8rem 1rem;
-            min-width: 120px;
-            text-align: center;
+            padding: 1.15rem 1.25rem;
             border: 1px solid var(--border);
         }
-        .kpi .value {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--primary);
+        .card h3 {
+            font-size: 0.92rem;
+            margin-bottom: 0.85rem;
+            color: var(--text);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            letter-spacing: -0.01em;
         }
-        .kpi .label {
-            font-size: 0.72rem;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
+        .card-icon {
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
         }
+        .card-icon.red { background: #ffe4e6; }
+        .card-icon.teal { background: var(--accent-soft); }
+        .card-icon.amber { background: #fef3c7; }
+        .card-icon.blue { background: #e0e7ff; }
 
-        /* TABLES */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82rem;
-            margin-top: 0.5rem;
-        }
-        th, td {
-            padding: 0.5rem 0.6rem;
-            border-bottom: 1px solid #e8e8e0;
-            text-align: center;
-        }
-        th {
-            background: #f0f0e8;
-            font-weight: 700;
-            color: var(--primary-dark);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        td input {
-            width: 110px;                /* sufficiente per mostrare numeri a 4‑5 cifre */
-            padding: 0.3rem 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            text-align: center;
-            font-size: 0.85rem;
-        }
-        td input.large {
-            width: 140px;               /* per campi più ampi come kg e capacità */
-        }
-        td input.invalid {
-            border-color: var(--danger) !important;
-            background: #fff5f5;
-        }
-        /* Rimuove gli spin button su WebKit per evitare sovrapposizioni */
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            opacity: 1; /* visibili ma non coprono il testo se c'è abbastanza spazio */
-            height: 24px;
-        }
-        .sum-row {
-            font-weight: 700;
-            background: #fafaf5;
-        }
-        .alert-box {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 0.6rem 0.8rem;
-            border-radius: 5px;
-            margin-top: 0.6rem;
-            font-size: 0.82rem;
-            color: #856404;
-        }
-        .alert-danger {
-            background: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-        .veicolo-disattivato {
-            font-size: 0.7rem;
-            color: #999;
-            font-style: italic;
-            margin-top: 0.25rem;
-        }
-
-        /* CHARTS */
-        .charts-grid {
+        .charts-section {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.2rem;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 1rem;
         }
         .chart-container {
             background: var(--bg-card);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            padding: 1rem;
+            padding: 1rem 1.1rem 0.85rem;
+            height: 300px;
+            border: 1px solid var(--border);
+        }
+        .chart-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+        .chart-body {
+            height: calc(100% - 1.35rem);
             position: relative;
-            height: 320px;
         }
         .chart-container canvas {
             width: 100% !important;
             height: 100% !important;
         }
 
-        @media (max-width: 900px) {
-            body {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                min-width: 100%;
+        .dash-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        th, td {
+            padding: 0.55rem 0.65rem;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+        tbody tr { transition: background var(--transition); }
+        .panel-dashboard tbody tr:hover { background: #f8fafc; }
+        th {
+            background: #f1f5f9;
+            font-weight: 700;
+            color: var(--text);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .panel-dashboard th:first-child,
+        .panel-dashboard td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        td input {
+            width: 110px;
+            padding: 0.35rem 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+        td input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.12);
+        }
+        td input.large { width: 140px; }
+        td input.invalid {
+            border-color: var(--danger) !important;
+            background: #fef2f2;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+            height: 22px;
+        }
+        .row-warning { background: #fffbeb !important; }
+        .alert-box {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 1px solid #fcd34d;
+            padding: 0.65rem 0.85rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            font-size: 0.78rem;
+            color: #92400e;
+            font-weight: 500;
+        }
+        .alert-danger {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        #msg_90giorni {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            padding: 0.5rem 0.7rem;
+            background: #f0fdfa;
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--accent);
+            margin-top: 0.5rem;
+        }
+        #msg_90giorni strong { color: var(--text); }
+
+        @media (max-width: 1400px) {
+            .kpi-band { grid-template-columns: repeat(3, 1fr); }
+            .charts-section { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 1100px) {
+            .workspace { grid-template-columns: 1fr; }
+            .panel-config {
                 max-height: none;
                 position: static;
             }
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
+            .panel-dashboard { max-height: none; }
+            .veicoli-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .fields-2col { grid-template-columns: 1fr; }
+            .dash-grid { grid-template-columns: 1fr; }
+            .kpi-band { grid-template-columns: repeat(2, 1fr); }
+            .site-header { flex-wrap: wrap; padding: 0.75rem 1rem; }
         }
     </style>
 </head>
 <body>
+<div class="app">
 
-    <!-- SIDEBAR INPUT con pannelli richiudibili -->
-    <aside class="sidebar">
-        <h2>🏔️ Simulatore costi</h2>
-
-        <details open>
-            <summary>📋 Parametri generali</summary>
-            <div style="margin-top:0.6rem; display:flex; flex-direction:column; gap:0.5rem;">
-                <div>
-                    <label>Periodo in giorni considerato <span class="tooltip-text">Durata stagione operativa</span></label>
-                    <input type="number" id="periodo_giorni" value="60" min="1" step="1">
-                </div>
-                <div>
-                    <label>Posti letto totali</label>
-                    <input type="number" id="posti_letto" value="50" min="0" step="1">
-                </div>
-                <div>
-                    <label>Percentuale occupazione letti per notte (0-1)</label>
-                    <input type="number" id="coeff_utilizzo_letti" value="0.6" min="0" max="1" step="0.05">
-                </div>
-                <div>
-                    <label>Coperti ristorante totali</label>
-                    <input type="number" id="coperti" value="80" min="0" step="1">
-                </div>
-                <div>
-                    <label>Coeff. utilizzo coperti (0-1) <span class="tooltip-text">Per calcolo alternativo escursionisti</span></label>
-                    <input type="number" id="coeff_utilizzo_coperti" value="0.5" min="0" max="1" step="0.05">
-                </div>
-                <div>
-                    <label>Media escursionisti al giorno</label>
-                    <input type="number" id="escursionisti_giorno" value="30" min="0" step="1">
-                </div>
-                <div>
-                    <label>Rifiuti per ospite pernottamento (kg/giorno)</label>
-                    <input type="number" id="rifiuti_ospite_giorno" value="0.20" min="0" step="0.01">
-                </div>
-                <div>
-                    <label>Rifiuti per escursionista (kg/giorno)</label>
-                    <input type="number" id="rifiuti_escursionista_giorno" value="0.10" min="0" step="0.01">
-                </div>
-                <!-- Grigliato sempre attivo, senza checkbox -->
-                <div>
-                    <label>Grigliato per ospite/giorno (kg)</label>
-                    <input type="number" id="grigliato_ospite_giorno" value="0.2" min="0" step="0.01">
-                </div>
-            </div>
-        </details>
-
-        <details open>
-            <summary>🔧 Pre‑trattamento</summary>
-            <div class="checkbox-group" style="margin-top:0.6rem;">
-                <input type="checkbox" id="presenza_compattatore">
-                <label for="presenza_compattatore">Applica pre‑trattamento (riduzioni %)</label>
-            </div>
-            <p style="font-size:0.7rem;color:#999;margin-top:0.2rem;">
-                Attiva le riduzioni di massa/volume della tabella composizione.
-            </p>
-        </details>
-
-        <details open>
-            <summary>🧪 Composizione rifiuti & Stoccaggio</summary>
-            <div style="overflow-x:auto; margin-top:0.5rem;">
-                <table id="tabella_composizione" style="font-size:0.7rem; color:#ddd;">
-                    <thead>
-                        <tr>
-                            <th>Tipologia</th><th>% peso</th><th>Peso (kg)</th><th>Densità (kg/m³)</th>
-                            <th>Vol red %</th><th>Massa red %</th><th>Cap. stoccaggio (m³)</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <p id="error_percentuale" style="color:#f87171;font-weight:600;margin-top:0.5rem;"></p>
-        </details>
-
-        <details open>
-            <summary>🚛 Veicoli di trasporto</summary>
-            <div id="veicoli_container"></div>
-            <p style="font-size:0.65rem;color:#777;margin-top:0.3rem;">Impostare payload=0 per disattivare un veicolo.</p>
-        </details>
-
-        <div style="display:flex;gap:0.5rem;margin-top:0.3rem;">
-            <button class="btn btn-primary" id="btn_reset">↺ Ripristina default</button>
-        </div>
-        <p style="font-size:0.65rem;color:#777;margin-top:0.5rem;">
-            I calcoli sono aggiornati in tempo reale.
-        </p>
-    </aside>
-
-    <!-- MAIN OUTPUT -->
-    <main class="main">
-        <h1>Dashboard – Gestione Rifiuti in Quota</h1>
-
-        <!-- KPI -->
-        <div class="card">
-            <h3>📊 Riepilogo stagionale</h3>
-            <div class="kpi-row" id="kpi_container">
-                <div class="kpi"><span class="value" id="kpi_peso_pre">—</span><span class="label">Peso tot pre-tratt. (kg)</span></div>
-                <div class="kpi"><span class="value" id="kpi_peso_post">—</span><span class="label">Peso tot post-tratt. (kg)</span></div>
-                <div class="kpi"><span class="value" id="kpi_vol_pre">—</span><span class="label">Volume pre-tratt. (m³)</span></div>
-                <div class="kpi"><span class="value" id="kpi_vol_post">—</span><span class="label">Volume post-tratt. (m³)</span></div>
-                <div class="kpi"><span class="value" id="kpi_riduzione_massa">—</span><span class="label">Rid. massa totale (%)</span></div>
-                <div class="kpi"><span class="value" id="kpi_riduzione_volume">—</span><span class="label">Rid. volume totale (%)</span></div>
+    <header class="site-header">
+        <div class="brand">
+            <div class="brand-icon" aria-hidden="true">🏔️</div>
+            <div class="brand-text">
+                <h1>Simulatore gestione rifiuti</h1>
+                <p>Rifugi alpini · calcolo in tempo reale</p>
             </div>
         </div>
-
-        <!-- Pannello limiti di stoccaggio -->
-        <div class="card" id="card_stoccaggio">
-            <h3>📦 Limiti di stoccaggio e giorni di superamento</h3>
-            <div id="stoccaggio_alerts"></div>
-            <table id="tabella_stoccaggio">
-                <thead>
-                    <tr><th>Tipologia</th><th>Capacità (m³)</th><th>Vol. giornaliero (m³)</th><th>Giorno superamento</th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <p id="msg_90giorni" style="margin-top:0.5rem;"></p>
+        <div class="header-actions">
+            <span class="live-badge">Live</span>
+            <button class="btn btn-primary" id="btn_reset" type="button">↺ Ripristina default</button>
         </div>
+    </header>
 
-        <!-- Tabella dettaglio rifiuti -->
-        <div class="card">
-            <h3>🧪 Dettaglio rifiuti post‑trattamento</h3>
-            <div style="overflow-x:auto;">
-                <table id="tabella_dettaglio_rifiuti">
-                    <thead>
-                        <tr>
-                            <th>Tipologia</th><th>Peso pre (kg)</th><th>Volume pre (m³)</th><th>Peso post (kg)</th><th>Volume post (m³)</th><th>% peso totale</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+    <div class="workspace">
+
+        <!-- CONFIGURAZIONE -->
+        <aside class="panel-config">
+            <div class="panel-config-head">
+                <h2>Configurazione</h2>
+                <p>Modifica i parametri: i risultati si aggiornano subito.</p>
             </div>
-        </div>
+            <div class="config-scroll">
 
-        <!-- Tabella veicoli -->
-        <div class="card">
-            <h3>🚁 Logistica e costi</h3>
-            <table id="tabella_veicoli_output">
-                <thead>
-                    <tr><th>Veicolo</th><th>Payload eff. (kg)</th><th>Viaggi</th><th>Costo tot (€)</th><th>Costo/kg (€)</th><th>Sat. media</th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+                <section class="config-block">
+                    <h3 class="block-title"><span class="num">1</span> Stagione e struttura</h3>
+                    <div class="fields-2col">
+                        <div class="field-full">
+                            <label>Periodo in giorni <span class="tooltip-text">Durata stagione operativa</span></label>
+                            <input type="number" id="periodo_giorni" value="60" min="1" step="1">
+                        </div>
+                        <div>
+                            <label>Posti letto totali</label>
+                            <input type="number" id="posti_letto" value="50" min="0" step="1">
+                        </div>
+                        <div>
+                            <label>Occupazione letti (0–1)</label>
+                            <input type="number" id="coeff_utilizzo_letti" value="0.6" min="0" max="1" step="0.05">
+                        </div>
+                        <div>
+                            <label>Coperti ristorante</label>
+                            <input type="number" id="coperti" value="80" min="0" step="1">
+                        </div>
+                        <div>
+                            <label>Utilizzo coperti (0–1)</label>
+                            <input type="number" id="coeff_utilizzo_coperti" value="0.5" min="0" max="1" step="0.05">
+                        </div>
+                    </div>
+                </section>
 
-        <!-- Grafici -->
-        <div class="charts-grid">
-            <div class="chart-container"><canvas id="chart_doughnut"></canvas></div>
-            <div class="chart-container"><canvas id="chart_bar"></canvas></div>
-        </div>
-    </main>
+                <section class="config-block">
+                    <h3 class="block-title"><span class="num">2</span> Flussi e produzione rifiuti</h3>
+                    <div class="fields-2col">
+                        <div class="field-full">
+                            <label>Media escursionisti al giorno</label>
+                            <input type="number" id="escursionisti_giorno" value="30" min="0" step="1">
+                        </div>
+                        <div>
+                            <label>Rifiuti ospite (kg/g)</label>
+                            <input type="number" id="rifiuti_ospite_giorno" value="0.20" min="0" step="0.01">
+                        </div>
+                        <div>
+                            <label>Rifiuti escursionista (kg/g)</label>
+                            <input type="number" id="rifiuti_escursionista_giorno" value="0.10" min="0" step="0.01">
+                        </div>
+                        <div class="field-full">
+                            <label>Grigliato per ospite/giorno (kg)</label>
+                            <input type="number" id="grigliato_ospite_giorno" value="0.2" min="0" step="0.01">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="config-block">
+                    <h3 class="block-title"><span class="num">3</span> Pre-trattamento</h3>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="presenza_compattatore">
+                        <label for="presenza_compattatore">Applica pre-trattamento (riduzioni % massa e volume dalla tabella sotto)</label>
+                    </div>
+                </section>
+
+                <section class="config-block config-block-wide">
+                    <h3 class="block-title"><span class="num">4</span> Composizione e stoccaggio</h3>
+                    <div class="table-wrap">
+                        <table id="tabella_composizione">
+                            <thead>
+                                <tr>
+                                    <th>Tipologia</th><th>%</th><th>kg</th><th>ρ kg/m³</th>
+                                    <th>Vol−%</th><th>Mass−%</th><th>Cap. m³</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <p id="error_percentuale"></p>
+                </section>
+
+                <section class="config-block">
+                    <h3 class="block-title"><span class="num">5</span> Trasporto</h3>
+                    <div id="veicoli_container" class="veicoli-grid"></div>
+                    <p class="hint-text">Payload = 0 disattiva il veicolo nel calcolo costi.</p>
+                </section>
+
+            </div>
+        </aside>
+
+        <!-- DASHBOARD RISULTATI -->
+        <main class="panel-dashboard">
+
+            <div class="dash-intro">
+                <p class="eyebrow">Risultati</p>
+                <h2>Dashboard operativa</h2>
+                <p>Indicatori stagionali, analisi volumi, stoccaggio e confronto mezzi di trasporto.</p>
+            </div>
+
+            <section class="kpi-band" id="kpi_container" aria-label="Riepilogo stagionale">
+                <div class="kpi"><span class="value" id="kpi_peso_pre">—</span><span class="label">Peso pre-tratt. (kg)</span></div>
+                <div class="kpi"><span class="value" id="kpi_peso_post">—</span><span class="label">Peso post-tratt. (kg)</span></div>
+                <div class="kpi"><span class="value" id="kpi_vol_pre">—</span><span class="label">Volume pre (m³)</span></div>
+                <div class="kpi"><span class="value" id="kpi_vol_post">—</span><span class="label">Volume post (m³)</span></div>
+                <div class="kpi"><span class="value" id="kpi_riduzione_massa">—</span><span class="label">Rid. massa (%)</span></div>
+                <div class="kpi"><span class="value" id="kpi_riduzione_volume">—</span><span class="label">Rid. volume (%)</span></div>
+            </section>
+
+            <section class="charts-section" aria-label="Grafici">
+                <div class="chart-container">
+                    <div class="chart-title">Composizione per peso (post-trattamento)</div>
+                    <div class="chart-body"><canvas id="chart_doughnut"></canvas></div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Volume pre vs post-trattamento (m³)</div>
+                    <div class="chart-body"><canvas id="chart_bar"></canvas></div>
+                </div>
+            </section>
+
+            <div class="dash-grid">
+                <div class="card" id="card_stoccaggio">
+                    <h3><span class="card-icon amber">📦</span> Stoccaggio</h3>
+                    <div id="stoccaggio_alerts"></div>
+                    <div class="table-wrap">
+                        <table id="tabella_stoccaggio">
+                            <thead>
+                                <tr><th>Tipologia</th><th>Cap. (m³)</th><th>Vol./giorno</th><th>Giorno critico</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <p id="msg_90giorni"></p>
+                </div>
+
+                <div class="card">
+                    <h3><span class="card-icon blue">🚁</span> Logistica e costi</h3>
+                    <div class="table-wrap">
+                        <table id="tabella_veicoli_output">
+                            <thead>
+                                <tr><th>Veicolo</th><th>Payload (kg)</th><th>Viaggi</th><th>Tot. €</th><th>€/kg</th><th>Satur.</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <section class="card">
+                <h3><span class="card-icon teal">🧪</span> Dettaglio rifiuti post-trattamento</h3>
+                <div class="table-wrap">
+                    <table id="tabella_dettaglio_rifiuti">
+                        <thead>
+                            <tr>
+                                <th>Tipologia</th><th>Peso pre (kg)</th><th>Vol. pre (m³)</th>
+                                <th>Peso post (kg)</th><th>Vol. post (m³)</th><th>% peso</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</div>
 
     <script>
         (function() {
@@ -548,26 +860,83 @@
             // Charts
             let chartDoughnut, chartBar;
 
+            const CHART_COLORS = [
+                '#b91c3c', '#0d9488', '#d97706', '#6366f1', '#0891b2', '#7c3aed', '#059669', '#ea580c'
+            ];
+            const chartFont = { family: "'Plus Jakarta Sans', system-ui, sans-serif" };
+
             function initCharts() {
                 const ctx1 = document.getElementById('chart_doughnut').getContext('2d');
                 const ctx2 = document.getElementById('chart_bar').getContext('2d');
                 chartDoughnut = new Chart(ctx1, {
                     type: 'doughnut',
-                    data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom',
-                                labels: { boxWidth: 12, font: { size: 11 } } } } }
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: [],
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '58%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 10, padding: 14, font: { ...chartFont, size: 11 }, color: '#64748b' }
+                            }
+                        }
+                    }
                 });
                 chartBar = new Chart(ctx2, {
                     type: 'bar',
-                    data: { labels: [], datasets: [
-                            { label: 'Volume pre (m³)', data: [], backgroundColor: 'rgba(139,0,0,0.5)',
-                                borderColor: '#8B0000', borderWidth: 1 },
-                            { label: 'Volume post (m³)', data: [], backgroundColor: 'rgba(45,106,79,0.5)',
-                                borderColor: '#2d6a4f', borderWidth: 1 }
-                        ] },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true,
-                                title: { display: true, text: 'Metri cubi (m³)' } } }, plugins: { legend: { position: 'bottom',
-                                labels: { boxWidth: 12, font: { size: 11 } } } } }
+                    data: {
+                        labels: [],
+                        datasets: [
+                            {
+                                label: 'Volume pre (m³)',
+                                data: [],
+                                backgroundColor: 'rgba(185, 28, 60, 0.75)',
+                                borderColor: '#b91c3c',
+                                borderWidth: 0,
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Volume post (m³)',
+                                data: [],
+                                backgroundColor: 'rgba(13, 148, 136, 0.75)',
+                                borderColor: '#0d9488',
+                                borderWidth: 0,
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { ...chartFont, size: 10 }, color: '#64748b' }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                                ticks: { font: { ...chartFont, size: 10 }, color: '#64748b' },
+                                title: { display: true, text: 'm³', font: chartFont, color: '#94a3b8' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 10, padding: 14, font: { ...chartFont, size: 11 }, color: '#64748b' }
+                            }
+                        }
+                    }
                 });
             }
 
@@ -575,17 +944,17 @@
                 veicoliContainer.innerHTML = '';
                 state.veicoli.forEach((v, i) => {
                     const div = document.createElement('div');
-                    div.style.cssText = 'margin-bottom:0.8rem;padding:0.6rem;background:#2a2a2a;border-radius:6px;';
+                    div.className = 'veicolo-card';
                     div.innerHTML = `
-                        <strong style="color:#ddd;font-size:0.85rem;">${v.nome}</strong>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;margin-top:0.3rem;">
-                            <label>Payload (kg)</label><input type="number" data-veicolo="${i}" data-field="payload" value="${v.payload}" min="0" step="1">
-                            <label>Costo fisso (€)</label><input type="number" data-veicolo="${i}" data-field="costoFisso" value="${v.costoFisso}" min="0" step="0.01">
-                            <label>Costo variab. (€/min)</label><input type="number" data-veicolo="${i}" data-field="costoVario" value="${v.costoVario}" min="0" step="0.01">
-                            <label>Tempo viaggio (min)</label><input type="number" data-veicolo="${i}" data-field="tempoViaggio" value="${v.tempoViaggio}" min="0" step="0.1">
-                            <label>Fattore riempim. (0-1)</label><input type="number" data-veicolo="${i}" data-field="fattoreRiemp" value="${v.fattoreRiemp}" min="0" max="1" step="0.01">
+                        <strong>${v.nome}</strong>
+                        <div class="veicolo-grid-inner">
+                            <div><label>Payload (kg)</label><input type="number" data-veicolo="${i}" data-field="payload" value="${v.payload}" min="0" step="1"></div>
+                            <div><label>Costo fisso (€)</label><input type="number" data-veicolo="${i}" data-field="costoFisso" value="${v.costoFisso}" min="0" step="0.01"></div>
+                            <div><label>Costo var. (€/min)</label><input type="number" data-veicolo="${i}" data-field="costoVario" value="${v.costoVario}" min="0" step="0.01"></div>
+                            <div><label>Tempo (min)</label><input type="number" data-veicolo="${i}" data-field="tempoViaggio" value="${v.tempoViaggio}" min="0" step="0.1"></div>
+                            <div><label>Riempimento (0–1)</label><input type="number" data-veicolo="${i}" data-field="fattoreRiemp" value="${v.fattoreRiemp}" min="0" max="1" step="0.01"></div>
                         </div>
-                        <p class="veicolo-disattivato" style="display:${v.payload === 0 ? 'block' : 'none'};">* Veicolo disattivato</p>`;
+                        <p class="veicolo-disattivato" style="display:${v.payload === 0 ? 'block' : 'none'};">Veicolo disattivato</p>`;
                     veicoliContainer.appendChild(div);
                 });
             }
@@ -820,7 +1189,7 @@
                         <td>${volGiorn.toFixed(4)}</td>
                         <td>${giornoSup <= periodoGG ? giornoSup : 'Mai'}</td>`;
                     if (giornoSup <= periodoGG) {
-                        tr.style.background = '#fff3cd';
+                        tr.classList.add('row-warning');
                         if (giornoSup < giornoCriticoMin) {
                             giornoCriticoMin = giornoSup;
                             causaCritica = d.nome;
@@ -881,10 +1250,7 @@
                 // Charts
                 const labelsDough = dettaglio.map(d => d.nome);
                 const dataDough = dettaglio.map(d => d.pesoPost);
-                const colors = [
-                    '#8B0000', '#a0522d', '#b8860b', '#556b2f', '#2f4f4f', '#708090', '#6a5acd', '#9932cc'
-                ];
-                updateCharts(labelsDough, dataDough, dettaglio.map(d => d.volPre), dettaglio.map(d => d.volPost), colors);
+                updateCharts(labelsDough, dataDough, dettaglio.map(d => d.volPre), dettaglio.map(d => d.volPost), CHART_COLORS);
             }
 
             function clearOutputs() {
@@ -973,7 +1339,7 @@
                         const i = parseInt(e.target.dataset.veicolo);
                         const field = e.target.dataset.field;
                         state.veicoli[i][field] = parseFloat(e.target.value) || 0;
-                        const div = e.target.closest('div');
+                        const div = e.target.closest('.veicolo-card');
                         const commentEl = div?.querySelector('.veicolo-disattivato');
                         if (commentEl && field === 'payload') {
                             commentEl.style.display = state.veicoli[i].payload === 0 ? 'block' : 'none';
